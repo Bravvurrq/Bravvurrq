@@ -12,30 +12,30 @@
      market as at October 2026 (dealer benchmark data). */
   const PRODUCTS = [
     { name:'iPhone 8 Plus',   storage:'64GB',  series:'8',  price:125000,  was:149000,  grade:'Grade B', battery:85, tag:'In Stock', finish:'Gold',          h:42  },
-    { name:'iPhone X',        storage:'64GB',  series:'x',  price:175000,  was:199000,  grade:'Grade A', battery:87, tag:'In Stock', finish:'Space Grey',    h:222 },
+    { name:'iPhone X',        storage:'64GB',  series:'x',  price:175000,  was:199000,  grade:'Grade A', battery:87, tag:'In Stock', finish:'Space Grey',    h:220 },
     { name:'iPhone XR',       storage:'64GB',  series:'x',  price:235000,  was:265000,  grade:'Grade A', battery:89, tag:'In Stock', finish:'White',         h:210 },
-    { name:'iPhone 11',       storage:'64GB',  series:'11', price:260000,  was:289000,  grade:'Grade A', battery:88, tag:'Hot',      finish:'Black',         h:224 },
-    { name:'iPhone 11',       storage:'128GB', series:'11', price:300000,  was:335000,  grade:'Grade A', battery:90, tag:'In Stock', finish:'Purple',        h:236 },
+    { name:'iPhone 11',       storage:'64GB',  series:'11', price:260000,  was:289000,  grade:'Grade A', battery:88, tag:'Hot',      finish:'Green',         h:150 },
+    { name:'iPhone 11',       storage:'128GB', series:'11', price:300000,  was:335000,  grade:'Grade A', battery:90, tag:'In Stock', finish:'Green',         h:150 },
     { name:'iPhone 11 Pro',   storage:'256GB', series:'11', price:390000,  was:429000,  grade:'Grade A', battery:87, tag:'Few Left', finish:'Midnight Green',h:160 },
     { name:'iPhone 12',       storage:'128GB', series:'12', price:335000,  was:369000,  grade:'Grade A', battery:90, tag:'Hot',      finish:'Blue',          h:214 },
-    { name:'iPhone 12 Pro',   storage:'256GB', series:'12', price:440000,  was:485000,  grade:'Grade A', battery:89, tag:'In Stock', finish:'Pacific Blue',  h:206 },
+    { name:'iPhone 12 Pro',   storage:'256GB', series:'12', price:440000,  was:485000,  grade:'Grade A', battery:89, tag:'In Stock', finish:'Space Grey',    h:222 },
     { name:'iPhone 13',       storage:'128GB', series:'13', price:425000,  was:469000,  grade:'Grade A', battery:92, tag:'Hot',      finish:'Blue',          h:218 },
-    { name:'iPhone 13',       storage:'256GB', series:'13', price:465000,  was:515000,  grade:'Grade A', battery:93, tag:'In Stock', finish:'Midnight',      h:230 },
+    { name:'iPhone 13',       storage:'256GB', series:'13', price:465000,  was:515000,  grade:'Grade A', battery:93, tag:'In Stock', finish:'Blue',          h:218 },
     { name:'iPhone 13 Pro',   storage:'256GB', series:'13', price:635000,  was:699000,  grade:'Grade A', battery:91, tag:'Few Left', finish:'Sierra Blue',   h:198 },
-    { name:'iPhone 13 Pro Max',storage:'256GB',series:'13', price:735000,  was:799000,  grade:'Grade A', battery:92, tag:'In Stock', finish:'Graphite',      h:240 },
-    { name:'iPhone 14',       storage:'128GB', series:'14', price:495000,  was:545000,  grade:'Grade A', battery:94, tag:'Hot',      finish:'Blue',          h:226 },
-    { name:'iPhone 14 Pro',   storage:'256GB', series:'14', price:740000,  was:815000,  grade:'Grade A', battery:93, tag:'In Stock', finish:'Deep Purple',   h:260 },
-    { name:'iPhone 14 Pro Max',storage:'256GB',series:'14', price:915000,  was:999000,  grade:'Grade A', battery:93, tag:'In Stock', finish:'Space Black',   h:248 },
+    { name:'iPhone 13 Pro Max',storage:'256GB',series:'13', price:735000,  was:799000,  grade:'Grade A', battery:92, tag:'In Stock', finish:'Sierra Blue',   h:198 },
+    { name:'iPhone 14',       storage:'128GB', series:'14', price:495000,  was:545000,  grade:'Grade A', battery:94, tag:'Hot',      finish:'Purple',        h:285 },
+    { name:'iPhone 14 Pro',   storage:'256GB', series:'14', price:740000,  was:815000,  grade:'Grade A', battery:93, tag:'In Stock', finish:'Gold',          h:45  },
+    { name:'iPhone 14 Pro Max',storage:'256GB',series:'14', price:915000,  was:999000,  grade:'Grade A', battery:93, tag:'In Stock', finish:'Gold',          h:45  },
     { name:'iPhone 15',       storage:'128GB', series:'15', price:705000,  was:769000,  grade:'Grade A', battery:96, tag:'Hot',      finish:'Blue',          h:202 },
-    { name:'iPhone 15 Pro',   storage:'256GB', series:'15', price:895000,  was:969000,  grade:'Grade A', battery:95, tag:'Few Left', finish:'Natural Titanium',h:48 },
-    { name:'iPhone 15 Pro Max',storage:'256GB',series:'15', price:1060000, was:1149000, grade:'Grade A', battery:95, tag:'In Stock', finish:'Blue Titanium', h:210 },
+    { name:'iPhone 15 Pro',   storage:'256GB', series:'15', price:895000,  was:969000,  grade:'Grade A', battery:95, tag:'Few Left', finish:'Blue Titanium', h:215 },
+    { name:'iPhone 15 Pro Max',storage:'256GB',series:'15', price:1060000, was:1149000, grade:'Grade A', battery:95, tag:'In Stock', finish:'Natural Titanium',h:40 },
     { name:'iPhone 16',       storage:'128GB', series:'16', price:945000,  was:1020000, grade:'Grade A', battery:97, tag:'Hot',      finish:'Ultramarine',   h:232 },
-    { name:'iPhone 16 Pro',   storage:'256GB', series:'16', price:1250000, was:1340000, grade:'Grade A', battery:96, tag:'In Stock', finish:'Desert Titanium',h:36 },
-    { name:'iPhone 16 Pro Max',storage:'256GB',series:'16', price:1470000, was:1569000, grade:'Grade A', battery:96, tag:'Few Left', finish:'Natural Titanium',h:44 },
-    { name:'iPhone 17',       storage:'256GB', series:'17', price:1135000, was:null,    grade:'New',     battery:100,tag:'New',      finish:'Mist Blue',     h:208 },
-    { name:'iPhone 17 Air',   storage:'256GB', series:'17', price:1275000, was:null,    grade:'New',     battery:100,tag:'New',      finish:'Sky Blue',      h:196 },
-    { name:'iPhone 17 Pro',   storage:'256GB', series:'17', price:1425000, was:1545000, grade:'Grade A', battery:98, tag:'Hot',      finish:'Cosmic Orange', h:28  },
-    { name:'iPhone 17 Pro Max',storage:'256GB',series:'17', price:1585000, was:1699000, grade:'Grade A', battery:98, tag:'Few Left', finish:'Deep Blue',     h:220 },
+    { name:'iPhone 16 Pro',   storage:'256GB', series:'16', price:1250000, was:1340000, grade:'Grade A', battery:96, tag:'In Stock', finish:'Natural Titanium',h:40 },
+    { name:'iPhone 16 Pro Max',storage:'256GB',series:'16', price:1470000, was:1569000, grade:'Grade A', battery:96, tag:'Few Left', finish:'Black Titanium',h:230 },
+    { name:'iPhone 17',       storage:'256GB', series:'17', price:1135000, was:null,    grade:'New',     battery:100,tag:'New',      finish:'Lavender',      h:285 },
+    { name:'iPhone Air',      storage:'256GB', series:'17', price:1275000, was:null,    grade:'New',     battery:100,tag:'New',      finish:'Sky Blue',      h:200 },
+    { name:'iPhone 17 Pro',   storage:'256GB', series:'17', price:1425000, was:1545000, grade:'Grade A', battery:98, tag:'Hot',      finish:'Silver',        h:220 },
+    { name:'iPhone 17 Pro Max',storage:'256GB',series:'17', price:1585000, was:1699000, grade:'Grade A', battery:98, tag:'Few Left', finish:'Silver',        h:220 },
   ];
 
   const PHONE_SVG = `
@@ -49,10 +49,13 @@
 
   const tagClass = (t) => t === 'Hot' ? 't-hot' : t === 'Few Left' ? 't-few' : t === 'New' ? 't-new' : 't-stock';
 
+  const slugify = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
   const cardHTML = (p, i) => {
     const isNew = p.grade === 'New';
     const badge = isNew ? 'Brand New' : `UK Used · ${p.grade.replace('Grade ', '')}`;
     const save = p.was ? p.was - p.price : 0;
+    const slug = slugify(p.name);
     const msg =
       `Hello Opeyemi Phone & Gadgets 👋, I'd like to ORDER the ${p.name} ${p.storage} ` +
       `(${p.finish}, ${badge}, ${ngn(p.price)}) from your website. Is it still available?`;
@@ -61,7 +64,10 @@
         <div class="p-media">
           <span class="p-tag ${tagClass(p.tag)}">${p.tag}</span>
           ${p.was ? `<span class="p-was">Was ${ngn(p.was)}</span>` : ''}
-          ${PHONE_SVG}
+          <img class="p-shot" src="img/${slug}.webp" alt="${p.name} in ${p.finish}"
+               width="400" height="500" loading="lazy" decoding="async"
+               onerror="this.hidden=true;this.nextElementSibling.hidden=false">
+          <span class="p-fb" hidden>${PHONE_SVG}</span>
         </div>
         <div class="p-body">
           <div class="p-top">
@@ -143,7 +149,7 @@
 
   /* ---------------- trade-in valuation (sell) ---------------- */
   const TRADE = {
-    'iPhone 17 Pro Max':1080000,'iPhone 17 Pro':960000,'iPhone 17 Air':840000,'iPhone 17':760000,
+    'iPhone 17 Pro Max':1080000,'iPhone 17 Pro':960000,'iPhone Air':840000,'iPhone 17':760000,
     'iPhone 16 Pro Max':1000000,'iPhone 16 Pro':860000,'iPhone 16':650000,
     'iPhone 15 Pro Max':730000,'iPhone 15 Pro':620000,'iPhone 15':490000,
     'iPhone 14 Pro Max':630000,'iPhone 14 Pro':515000,'iPhone 14':345000,
