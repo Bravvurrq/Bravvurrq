@@ -3,13 +3,15 @@
   'use strict';
 
   const WA_NUMBER = '2349030393902';
-  const PHONE_DISPLAY = '09030393902';
+  const PHONE_DISPLAY = '09030393902'; // kept for reference / future use
+  void PHONE_DISPLAY;
   const wa = (msg) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
   const ngn = (n) => '₦' + Math.round(n).toLocaleString('en-NG');
 
   /* ---------------- catalog data ----------------
      Models & NGN prices reflect the Nigerian UK-used
-     market as at October 2026 (dealer benchmark data). */
+     market as at October 2026 (dealer benchmark data).
+     h = hue for card background — matches finish family. */
   const PRODUCTS = [
     { name:'iPhone 8 Plus',   storage:'64GB',  series:'8',  price:125000,  was:149000,  grade:'Grade B', battery:85, tag:'In Stock', finish:'Gold',          h:42  },
     { name:'iPhone X',        storage:'64GB',  series:'x',  price:175000,  was:199000,  grade:'Grade A', battery:87, tag:'In Stock', finish:'Space Grey',    h:220 },
@@ -39,7 +41,8 @@
   ];
 
   const PHONE_SVG = `
-    <svg class="p-phone" viewBox="0 0 120 240" aria-hidden="true">
+    <svg class="p-phone" viewBox="0 0 120 240" aria-hidden="true" role="img">
+      <title>Phone placeholder</title>
       <rect x="7" y="7" width="106" height="226" rx="24" fill="rgba(4,10,36,.55)"
             stroke="currentColor" stroke-width="4"/>
       <rect x="17" y="30" width="86" height="180" rx="12" fill="currentColor" opacity=".14"/>
@@ -59,13 +62,16 @@
     const msg =
       `Hello Opeyemi Phone & Gadgets 👋, I'd like to ORDER the ${p.name} ${p.storage} ` +
       `(${p.finish}, ${badge}, ${ngn(p.price)}) from your website. Is it still available?`;
+    // Eager-load first 4 images for LCP, lazy rest
+    const loading = i < 4 ? 'eager' : 'lazy';
+    const fetchPriority = i < 2 ? 'high' : 'auto';
     return `
-      <article class="p-card" style="--h:${p.h};animation-delay:${Math.min(i, 8) * 45}ms">
+      <article class="p-card" style="--h:${p.h};animation-delay:${Math.min(i, 8) * 45}ms" role="listitem">
         <div class="p-media">
           <span class="p-tag ${tagClass(p.tag)}">${p.tag}</span>
           ${p.was ? `<span class="p-was">Was ${ngn(p.was)}</span>` : ''}
-          <img class="p-shot" src="img/${slug}.webp" alt="${p.name} in ${p.finish}"
-               width="400" height="500" loading="lazy" decoding="async"
+          <img class="p-shot" src="img/${slug}.webp" alt="${p.name} ${p.storage} in ${p.finish} — ${badge}, battery ${p.battery}%"
+               width="400" height="500" loading="${loading}" fetchpriority="${fetchPriority}" decoding="async"
                onerror="this.hidden=true;this.nextElementSibling.hidden=false">
           <span class="p-fb" hidden>${PHONE_SVG}</span>
         </div>
@@ -80,7 +86,7 @@
             ${p.was ? `<span class="was">${ngn(p.was)}</span>` : ''}
             ${save ? `<span class="save">Save ${ngn(save)}</span>` : ''}
           </div>
-          <a class="btn btn-wa" href="${wa(msg)}" target="_blank" rel="noopener">
+          <a class="btn btn-wa" href="${wa(msg)}" target="_blank" rel="noopener" aria-label="Order ${p.name} ${p.storage} on WhatsApp">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.7 14.9L2 22l5.3-1.4A10 10 0 1 0 12 2zm4.6 12.1c-.3-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.2.2-.3.2-.6.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4 0-.5.1-.7l.5-.6c.1-.2.1-.4 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2c0 1.3.9 2.6 1 2.8.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.3-.4z" fill="currentColor"/></svg>
             Order via WhatsApp
           </a>
@@ -88,49 +94,113 @@
       </article>`;
   };
 
-  /* ---------------- shops (grid + filter chips) ---------------- */
-  document.querySelectorAll('[data-shop]').forEach((shop) => {
-    const grid = shop.querySelector('[data-grid]');
-    const empty = shop.querySelector('[data-empty]');
-    const meta = shop.querySelector('[data-count-label]');
-    let filter = 'all';
+  /* ---------------- shops (grid + filter chips) — shared filter state ---------------- */
+  const shops = document.querySelectorAll('[data-shop]');
+  let activeFilter = 'all';
 
-    const render = () => {
-      const list = filter === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.series === filter);
+  const renderAllShops = () => {
+    shops.forEach((shop) => {
+      const grid = shop.querySelector('[data-grid]');
+      const empty = shop.querySelector('[data-empty]');
+      const meta = shop.querySelector('[data-count-label]');
+      if (!grid || !empty || !meta) return;
+      const list = activeFilter === 'all' ? PRODUCTS : PRODUCTS.filter((p) => p.series === activeFilter);
       grid.innerHTML = list.map(cardHTML).join('');
       empty.hidden = list.length > 0;
-      meta.textContent = `Showing ${list.length} of ${PRODUCTS.length} units in stock`;
-    };
+      meta.textContent = `Showing ${list.length} of ${PRODUCTS.length} units in stock` + (activeFilter !== 'all' ? ` · Filter: ${activeFilter === 'x' ? 'iPhone X / XR' : 'iPhone ' + activeFilter}` : '');
+    });
+    // Sync chip states across all shops
+    document.querySelectorAll('.chip[data-filter]').forEach((chip) => {
+      const isActive = chip.dataset.filter === activeFilter;
+      chip.classList.toggle('is-active', isActive);
+      chip.setAttribute('aria-pressed', String(isActive));
+    });
+  };
 
-    shop.querySelectorAll('.chip').forEach((chip) => {
+  // Chip click + keyboard navigation
+  shops.forEach((shop) => {
+    const chips = shop.querySelectorAll('.chip[data-filter]');
+    chips.forEach((chip) => {
       chip.addEventListener('click', () => {
-        shop.querySelectorAll('.chip').forEach((c) => c.classList.remove('is-active'));
-        chip.classList.add('is-active');
-        filter = chip.dataset.filter;
-        render();
+        activeFilter = chip.dataset.filter;
+        renderAllShops();
       });
     });
-
-    render();
+    // Arrow key navigation between chips
+    const chipArray = Array.from(chips);
+    shop.addEventListener('keydown', (e) => {
+      const idx = chipArray.indexOf(document.activeElement);
+      if (idx === -1) return;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        chipArray[(idx + 1) % chipArray.length].focus();
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        chipArray[(idx - 1 + chipArray.length) % chipArray.length].focus();
+      } else if (e.key === 'Home') {
+        e.preventDefault(); chipArray[0].focus();
+      } else if (e.key === 'End') {
+        e.preventDefault(); chipArray[chipArray.length - 1].focus();
+      }
+    });
   });
 
-  /* ---------------- modal system ---------------- */
+  // Initial render
+  if (shops.length) renderAllShops();
+
+  /* ---------------- modal system — focus trap, inert, scroll lock ---------------- */
   let lastFocus = null;
+  let scrollY = 0;
+  const focusableSelector = 'a[href], button:not([disabled]), select:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  const getFocusable = (root) => Array.from(root.querySelectorAll(focusableSelector)).filter((el) => !el.hidden && el.offsetParent !== null);
 
   const openModal = (id) => {
     const modal = document.getElementById(id);
     if (!modal) return;
     lastFocus = document.activeElement;
+    // Save scroll position to prevent jump on iOS
+    scrollY = window.scrollY || window.pageYOffset;
     modal.hidden = false;
     document.body.classList.add('locked');
-    const focusable = modal.querySelector('select, button, a[href], input, textarea');
-    if (focusable) setTimeout(() => focusable.focus({ preventScroll: true }), 60);
+    // Prevent background from being read by screen readers
+    document.querySelectorAll('header.site-header, main, footer.site-footer, .mobile-bar').forEach((el) => {
+      el.setAttribute('aria-hidden', 'true');
+      // inert is modern; fallback to aria-hidden
+      if ('inert' in HTMLElement.prototype) el.inert = true;
+    });
+    // Focus first focusable inside modal
+    const focusable = getFocusable(modal);
+    if (focusable.length) setTimeout(() => focusable[0].focus({ preventScroll: true }), 60);
+    // Trap focus handler attached per modal open (one global listener handles all)
   };
 
   const closeModal = (modal) => {
+    if (!modal || modal.hidden) return;
     modal.hidden = true;
-    if (!document.querySelector('.modal:not([hidden])')) document.body.classList.remove('locked');
-    if (lastFocus) lastFocus.focus({ preventScroll: true });
+    // Check if any modal still open
+    const stillOpen = document.querySelector('.modal:not([hidden])');
+    if (!stillOpen) {
+      document.body.classList.remove('locked');
+      // Restore background accessibility
+      document.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
+        // Only remove from main layout, not from hero decorative etc.
+        if (el.matches('header.site-header, main, footer.site-footer, .mobile-bar')) {
+          el.removeAttribute('aria-hidden');
+          if ('inert' in HTMLElement.prototype) el.inert = false;
+        }
+      });
+      // Restore focus
+      if (lastFocus && typeof lastFocus.focus === 'function') {
+        try { lastFocus.focus({ preventScroll: true }); } catch (_) { lastFocus.focus(); }
+      }
+      // Restore scroll on mobile Safari where body lock may have shifted
+      // No scroll jump needed because we use overflow:hidden only
+    } else {
+      // Focus next open modal's first element
+      const focusable = getFocusable(stillOpen);
+      if (focusable.length) focusable[0].focus({ preventScroll: true });
+    }
   };
 
   document.querySelectorAll('[data-open]').forEach((btn) => {
@@ -141,10 +211,32 @@
     modal.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) closeModal(modal); });
   });
 
+  // Global key handlers: Escape to close, Tab trap
   document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
     const open = document.querySelector('.modal:not([hidden])');
-    if (open) closeModal(open);
+    if (!open) return;
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeModal(open);
+      return;
+    }
+    if (e.key === 'Tab') {
+      const focusable = getFocusable(open);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
   });
 
   /* ---------------- trade-in valuation (sell) ---------------- */
@@ -165,6 +257,7 @@
   const BATT_MULT = { '95':1, '90':.97, '85':.93, '80':.88 };
 
   const fillSelect = (sel, keys) => {
+    if (!sel) return;
     sel.innerHTML = keys.map((k) => `<option value="${k}">${k}</option>`).join('');
   };
   const modelKeys = Object.keys(TRADE);
@@ -173,22 +266,31 @@
   const sellModel = document.getElementById('sell-model');
   const estValue = document.getElementById('est-value');
   const estRange = document.getElementById('est-range');
-  fillSelect(sellModel, modelKeys);
-  sellModel.value = 'iPhone 13';
+
+  if (sellModel) {
+    fillSelect(sellModel, modelKeys);
+    sellModel.value = 'iPhone 13';
+  }
 
   const round5k = (n) => Math.max(5000, Math.round(n / 5000) * 5000);
 
   const calcEstimate = () => {
+    if (!sellModel || !sellForm) return { mid: 0, low: 0, high: 0 };
     const base = TRADE[sellModel.value] || 0;
     if (!base) return { mid: 0, low: 0, high: 0 };
-    const storage = document.getElementById('sell-storage').value;
-    const batt = document.getElementById('sell-battery').value;
-    const cond = sellForm.querySelector('input[name="condition"]:checked').value;
-    const mid = round5k(base * STORAGE_MULT[storage] * COND_MULT[cond] * BATT_MULT[batt]);
-    return { mid, low: round5k(mid * .95), high: round5k(mid * 1.05) };
+    const storageEl = document.getElementById('sell-storage');
+    const battEl = document.getElementById('sell-battery');
+    const condInput = sellForm.querySelector('input[name="condition"]:checked');
+    if (!storageEl || !battEl || !condInput) return { mid: 0, low: 0, high: 0 };
+    const storage = storageEl.value;
+    const batt = battEl.value;
+    const cond = condInput.value;
+    const mid = round5k(base * (STORAGE_MULT[storage] || 1) * (COND_MULT[cond] || 1) * (BATT_MULT[batt] || 1));
+    return { mid, low: round5k(mid * 0.95), high: round5k(mid * 1.05) };
   };
 
   const updateEstimate = () => {
+    if (!estValue || !estRange) return;
     const { mid, low, high } = calcEstimate();
     estValue.textContent = mid ? ngn(mid) : 'Call us';
     estRange.textContent = mid
@@ -196,46 +298,65 @@
       : 'Select your exact model for an estimate, or call 09030393902';
   };
 
-  sellForm.addEventListener('input', updateEstimate);
-  updateEstimate();
+  if (sellForm) {
+    sellForm.addEventListener('input', updateEstimate);
+    sellForm.addEventListener('change', updateEstimate);
+    updateEstimate();
 
-  sellForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const condLabel = sellForm.querySelector('input[name="condition"]:checked').closest('label').querySelector('span').textContent;
-    const { mid, low, high } = calcEstimate();
-    const msg =
-      `Hello Opeyemi Phone & Gadgets 👋\n\n` +
-      `I want to SELL my phone:\n` +
-      `• Model: ${sellModel.value}\n` +
-      `• Storage: ${document.getElementById('sell-storage').value}GB\n` +
-      `• Battery: ${document.getElementById('sell-battery').value}%+\n` +
-      `• Condition: ${condLabel}\n` +
-      `• Website estimate: ${mid ? `${ngn(low)} – ${ngn(high)}` : 'to be discussed'}\n\n` +
-      `Please give me your final offer.`;
-    window.open(wa(msg), '_blank', 'noopener');
-  });
+    sellForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const condChecked = sellForm.querySelector('input[name="condition"]:checked');
+      const condLabelEl = condChecked ? condChecked.closest('label') : null;
+      const condLabel = condLabelEl ? condLabelEl.querySelector('span').textContent.trim() : (condChecked ? condChecked.value : '—');
+      const storageEl = document.getElementById('sell-storage');
+      const battEl = document.getElementById('sell-battery');
+      const { mid, low, high } = calcEstimate();
+      const msg =
+        `Hello Opeyemi Phone & Gadgets 👋\n\n` +
+        `I want to SELL my phone:\n` +
+        `• Model: ${sellModel.value}\n` +
+        `• Storage: ${storageEl ? storageEl.value : '—'}GB\n` +
+        `• Battery: ${battEl ? battEl.value : '—'}%+\n` +
+        `• Condition: ${condLabel}\n` +
+        `• Website estimate: ${mid ? `${ngn(low)} – ${ngn(high)}` : 'to be discussed'}\n\n` +
+        `Please give me your final offer.`;
+      window.open(wa(msg), '_blank', 'noopener');
+    });
+  }
 
   /* ---------------- swap inquiry ---------------- */
   const swapForm = document.getElementById('swap-form');
   const swapHave = document.getElementById('swap-have');
   const swapWant = document.getElementById('swap-want');
-  fillSelect(swapHave, modelKeys);
-  swapHave.value = 'iPhone 11';
-  fillSelect(swapWant, PRODUCTS.map((p) => `${p.name} ${p.storage}`).filter((v, i, a) => a.indexOf(v) === i));
-  swapWant.value = swapWant.options[Math.min(8, swapWant.options.length - 1)].value;
+  if (swapHave) {
+    fillSelect(swapHave, modelKeys);
+    swapHave.value = 'iPhone 11';
+  }
+  if (swapWant) {
+    const distinctWants = PRODUCTS.map((p) => `${p.name} ${p.storage}`).filter((v, i, a) => a.indexOf(v) === i);
+    fillSelect(swapWant, distinctWants);
+    if (swapWant.options.length) swapWant.value = swapWant.options[Math.min(8, swapWant.options.length - 1)].value;
+  }
 
-  swapForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const msg =
-      `Hello Opeyemi Phone & Gadgets 👋\n\n` +
-      `I want to SWAP my phone:\n` +
-      `• I have: ${swapHave.value} (${document.getElementById('swap-storage').value}, ` +
-      `${document.getElementById('swap-cond').value})\n` +
-      `• I want: ${swapWant.value}\n` +
-      (document.getElementById('swap-note').value.trim() ? `• Note: ${document.getElementById('swap-note').value.trim()}\n` : '') +
-      `\nPlease check the value and tell me the top-up (or cash back).`;
-    window.open(wa(msg), '_blank', 'noopener');
-  });
+  if (swapForm) {
+    swapForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const haveEl = document.getElementById('swap-have');
+      const storageEl = document.getElementById('swap-storage');
+      const condEl = document.getElementById('swap-cond');
+      const wantEl = document.getElementById('swap-want');
+      const noteEl = document.getElementById('swap-note');
+      const msg =
+        `Hello Opeyemi Phone & Gadgets 👋\n\n` +
+        `I want to SWAP my phone:\n` +
+        `• I have: ${haveEl ? haveEl.value : '—'} (${storageEl ? storageEl.value : '—'}, ` +
+        `${condEl ? condEl.value : '—'})\n` +
+        `• I want: ${wantEl ? wantEl.value : '—'}\n` +
+        (noteEl && noteEl.value.trim() ? `• Note: ${noteEl.value.trim()}\n` : '') +
+        `\nPlease check the value and tell me the top-up (or cash back).`;
+      window.open(wa(msg), '_blank', 'noopener');
+    });
+  }
 
   /* ---------------- static WhatsApp links ---------------- */
   const welcome =
@@ -247,7 +368,19 @@
 
   /* ---------------- header + reveal + counters ---------------- */
   const header = document.querySelector('.site-header');
-  addEventListener('scroll', () => header.classList.toggle('scrolled', scrollY > 10), { passive: true });
+  if (header) {
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        header.classList.toggle('scrolled', window.scrollY > 10);
+        ticking = false;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
 
   const io = 'IntersectionObserver' in window
     ? new IntersectionObserver((entries) => {
@@ -256,14 +389,19 @@
           en.target.classList.add('in');
           io.unobserve(en.target);
         });
-      }, { threshold: .12, rootMargin: '0px 0px -40px' })
+      }, { threshold: 0.12, rootMargin: '0px 0px -40px' })
     : null;
   document.querySelectorAll('.reveal').forEach((el) => (io ? io.observe(el) : el.classList.add('in')));
 
   const counters = document.querySelectorAll('[data-count]');
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const runCounter = (el) => {
-    const target = +el.dataset.count;
+    const target = Number(el.dataset.count) || 0;
     const suffix = el.dataset.suffix || '+';
+    if (prefersReduced) {
+      el.textContent = target + suffix;
+      return;
+    }
     const t0 = performance.now();
     const tick = (t) => {
       const p = Math.min((t - t0) / 1200, 1);
@@ -275,11 +413,15 @@
   if ('IntersectionObserver' in window) {
     const cio = new IntersectionObserver((entries) => {
       entries.forEach((en) => { if (en.isIntersecting) { runCounter(en.target); cio.unobserve(en.target); } });
-    }, { threshold: .5 });
+    }, { threshold: 0.5 });
     counters.forEach((el) => cio.observe(el));
   } else {
     counters.forEach(runCounter);
   }
 
-  document.getElementById('year').textContent = new Date().getFullYear();
+  const yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+  // Expose for debugging / testing
+  window.OpeyemiShop = { PRODUCTS, TRADE, wa, ngn };
 })();

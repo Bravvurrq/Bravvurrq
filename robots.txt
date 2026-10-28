@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bravvurrq.github.io/Bravvurrq/sitemap.xml
