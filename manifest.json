@@ -1,0 +1,20 @@
+{
+  "name": "Opeyemi Phone & Gadgets",
+  "short_name": "Opeyemi Gadgets",
+  "description": "Quality new & UK used phones at best price. Nationwide delivery, physical inspection, receipt issued. BN: 7710639",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0a1656",
+  "theme_color": "#0a1656",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a1656'/%3E%3Ctext x='32' y='42' font-family='Arial' font-size='28' font-weight='700' fill='%23f2c14e' text-anchor='middle'%3EOP%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["shopping", "electronics"],
+  "lang": "en-NG",
+  "orientation": "portrait"
+}
